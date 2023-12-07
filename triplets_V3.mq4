@@ -9,7 +9,7 @@
 
 #property copyright "Copyright 2023, Paul Muscat."
 #property link      "https://www.mql5.com"
-#property version   "1.00"
+#property version   "3.00"
 #property strict
 #include <MasterFile.mqh>
 #include <MasterFile 2.mqh>
@@ -121,7 +121,7 @@ if (!LiveTrade)
 //if (AccountCompany ()!="IG Group Limited")  return (INIT_FAILED);
 
 Sec_name=   D;
-inpTradeComments     = IntegerToString(inpMagicNumber);
+inpTradeComments     = "triplets_v3";
 Comment (" ");
 post=" ";
 post+="\n Description=   "+  D;
@@ -226,10 +226,16 @@ if (LiveTrade || Symbol()== Sec_a )
 ord1= orderExecute (ORDER_TYPE_BUY,Sec_a,0,0,OrderScaling, inpTradeComments, inpMagicNumber);
 
 if (LiveTrade || Symbol()== Sec_b )
-ord2= orderExecute (ORDER_TYPE_BUY,Sec_b,0,0, order_size*OrderScaling, inpTradeComments,inpMagicNumber);
+   if (hedge_Ratio) >0
+      ord2= orderExecute (ORDER_TYPE_BUY,Sec_b,0,0, order_size*OrderScaling, inpTradeComments,inpMagicNumber);
+   else
+      ord2= orderExecute (ORDER_TYPE_SELL,Sec_b,0,0, order_size*OrderScaling, inpTradeComments,inpMagicNumber);
 
 if (LiveTrade || Symbol()== Sec_c )
-ord3= orderExecute (ORDER_TYPE_SELL,Sec_c,0,0, order_size2*OrderScaling, inpTradeComments,inpMagicNumber);
+   if (hedge_Ratio2) >0
+      ord3= orderExecute (ORDER_TYPE_BUY,Sec_c,0,0, order_size2*OrderScaling, inpTradeComments,inpMagicNumber);
+   else
+      ord3= orderExecute (ORDER_TYPE_SELL,Sec_c,0,0, order_size2*OrderScaling, inpTradeComments,inpMagicNumber);
 
 if (ord1>0 || ord2>0 || ord3>0 ) {Status=INALONG;return;}
 
@@ -244,14 +250,19 @@ ord3=-1;
 post+="\nShort Entry called  try and sell- "+D;
 
 if (LiveTrade || Symbol()== Sec_a )
-ord1= orderExecute (ORDER_TYPE_SELL,Sec_b,0,0,order_size*OrderScaling, inpTradeComments, inpMagicNumber);
+ord1= orderExecute (ORDER_TYPE_SELL,Sec_b,0,0,OrderScaling, inpTradeComments, inpMagicNumber);
 
 if (LiveTrade  || Symbol()== Sec_b )
-ord2= orderExecute (ORDER_TYPE_SELL,Sec_a,0,0,OrderScaling, inpTradeComments, inpMagicNumber);
+   if (hedge_Ratio2)>0
+      ord2= orderExecute (ORDER_TYPE_SELL,Sec_a,0,0,order_size*OrderScaling, inpTradeComments, inpMagicNumber);
+   else
+      ord2= orderExecute (ORDER_TYPE_BUY,Sec_a,0,0,order_size*OrderScaling, inpTradeComments, inpMagicNumber);
 
 if (LiveTrade  || Symbol()== Sec_c )
-ord3= orderExecute (ORDER_TYPE_BUY,Sec_c,0,0,order_size2*OrderScaling, inpTradeComments, inpMagicNumber);
-
+   if (hedge_Ratio2)>0
+      ord3= orderExecute (ORDER_TYPE_SELL,Sec_c,0,0,order_size2*OrderScaling, inpTradeComments, inpMagicNumber);
+   else
+      ord3= orderExecute (ORDER_TYPE_BUY,Sec_c,0,0,order_size2*OrderScaling, inpTradeComments, inpMagicNumber);
 
 if (ord2>0 || ord1>0|| ord3>0 ) {Status=INASHORT;return;}
 }
@@ -426,8 +437,6 @@ return;
 void CheckEntry ()
 
 {
-
-
  
  if ((spread_< df[lower_b,counter]) && (Status==WAITING))
    {
@@ -438,8 +447,6 @@ if ((spread_>df[upper_b,counter]) && (Status==WAITING))
    {
       ShortEntry();
    }
- 
-
 
 }
 
